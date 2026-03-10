@@ -1,0 +1,8 @@
+{
+  "mappings": [
+    "/content/wasisa-eds/:/"
+  ],
+  "includes": [
+    "/content/wasisa-eds/"
+  ]
+}
