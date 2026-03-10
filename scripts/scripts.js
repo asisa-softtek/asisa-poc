@@ -127,38 +127,11 @@ export function decorateMain(main) {
 }
 
 /**
- * Inicializa el Universal Editor inyectando las dependencias en el head.
- */
-function initUniversalEditor() {
-  const hostname = window.location.hostname;
-  // Aseguramos que solo cargue en entornos de desarrollo/autoría, no en producción final
-  if (hostname === 'localhost' || hostname.includes('hlx.page') || hostname.includes('hlx.live') || hostname.includes('aem.live')) {
-    
-    // 1. Crear el Meta Tag de conexión
-    const metaConnection = document.createElement('meta');
-    metaConnection.name = 'urn:adobe:aue:system:aemconnection';
-    // ATENCIÓN: Sustituye el enlace de abajo por la URL de tu entorno AEM
-    metaConnection.content = 'aem:https://author-p133185-e1320482.adobeaemcloud.com'; 
-    document.head.append(metaConnection);
-
-    // 2. Cargar el script CORS
-    const corsScript = document.createElement('script');
-    corsScript.src = 'https://universal-editor-service.adobe.io/cors.js';
-    corsScript.async = true;
-    document.head.append(corsScript);
-  }
-}
-
-/**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
-
-  // Inyectamos las etiquetas del Universal Editor antes de procesar el DOM
-  initUniversalEditor();
-
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
