@@ -1,5 +1,5 @@
 mountpoints:
   /:
-    url: https://author-p133185-e1320482.adobeaemcloud.com/bin/franklin.delivery/asisa-softtek/asisa-poc/main"
+    url: https://author-p133185-e1320482.adobeaemcloud.com/bin/franklin.delivery/asisa-softtek/asisa-poc/main
     type: "markup"
     suffix: ".html"
