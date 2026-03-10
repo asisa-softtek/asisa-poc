@@ -127,6 +127,7 @@ export function decorateMain(main) {
 }
 
 /**
+<<<<<<< HEAD
  * Inicializa el Universal Editor inyectando las dependencias en el head.
  */
 function initUniversalEditor() {
@@ -149,15 +150,14 @@ function initUniversalEditor() {
 }
 
 /**
+=======
+>>>>>>> 8e34fd326ab690b207d162782816bc55bbcd8ed3
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
-
-  // Inyectamos las etiquetas del Universal Editor antes de procesar el DOM
   initUniversalEditor();
-
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
