@@ -130,15 +130,14 @@ export function decorateMain(main) {
  * Inicializa el Universal Editor inyectando las dependencias en el head.
  */
 function initUniversalEditor() {
-  const hostname = window.location.hostname;
+  const { hostname } = window.location;
   // Aseguramos que solo cargue en entornos de desarrollo/autoría, no en producción final
   if (hostname === 'localhost' || hostname.includes('hlx.page') || hostname.includes('hlx.live') || hostname.includes('aem.live')) {
-    
     // 1. Crear el Meta Tag de conexión
     const metaConnection = document.createElement('meta');
     metaConnection.name = 'urn:adobe:aue:system:aemconnection';
     // ATENCIÓN: Sustituye el enlace de abajo por la URL de tu entorno AEM
-    metaConnection.content = 'aem:https://author-p133185-e1320482.adobeaemcloud.com'; 
+    metaConnection.content = 'aem:https://author-p133185-e1320482.adobeaemcloud.com';
     document.head.append(metaConnection);
 
     // 2. Cargar el script CORS
