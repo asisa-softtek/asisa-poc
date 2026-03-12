@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     // 2. Obtener la plantilla desde AEM (Gestionada por autores)
     // Usamos el dominio .aem.live para asegurar que traemos la versión publicada.
-    const TEMPLATE_URL = 'https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html';
+    const TEMPLATE_URL = 'https://main--asisa-poc--asisa-softtek.aem.live/plantilla-pokemon.plain.html';
     let html;
     
     try {
