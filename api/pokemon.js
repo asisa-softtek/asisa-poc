@@ -40,33 +40,16 @@ export default async function handler(req, res) {
       html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
     }
 
-    // 3. Inyectar datos en la plantilla (Placeholders)
-    const statsHtml = pokemon.stats
-      .map(s => `<li><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</li>`)
-      .join('');
-    
-    const typesHtml = pokemon.types
-      .map(t => `<li>${t.type.name.toUpperCase()}</li>`)
-      .join('');
-
-    const replacements = {
-      '{{name}}': pokemon.name.toUpperCase(),
-      '{{name_id}}': pokemon.name.toLowerCase(),
-      '{{image}}': pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default,
-      '{{id}}': pokemon.id,
-      '{{stats}}': statsHtml,
-      '{{types}}': typesHtml,
-      '{{weight}}': pokemon.weight / 10,
-      '{{height}}': pokemon.height / 10
-    };
-
-    // Aplicar reemplazos
-    Object.keys(replacements).forEach(key => {
-      html = html.split(key).join(replacements[key]);
-    });
+    // 3. Inyectar datos en la plantilla (TEST SIMPLE)
+    html = `<div>
+      <h1 id="test-header">${pokemon.name.toUpperCase()}</h1>
+      <p>ID: #${pokemon.id}</p>
+      <p>Si ves esto, el pipeline BYOM funciona.</p>
+    </div>`;
 
     // Fix específico por si el autor dejó src="about:error" en la imagen
-    html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
+    const testImage = pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default;
+    html = html.replace('src="about:error"', `src="${testImage}"`);
 
     // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
     // Añadimos un comentario de debug para verificar en el view-source de AEM
