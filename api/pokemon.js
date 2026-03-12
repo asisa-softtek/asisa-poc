@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
-  const { name } = req.query;
-  const pokemonName = name ? name.toLowerCase() : '';
+  let { name } = req.query;
+  const pokemonName = name ? name.toLowerCase().replace(/\.html$/, '') : '';
 
   if (!pokemonName) {
     return res.status(400).send('Pokemon name is required');
