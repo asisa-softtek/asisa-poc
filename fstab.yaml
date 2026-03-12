@@ -1,2 +1,3 @@
 mountpoints:
+  /pokemon: https://asisa-poc.vercel.app/pokemon
   /: https://content.da.live/asisa-softtek/asisa-poc/main/
