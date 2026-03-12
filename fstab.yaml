@@ -3,3 +3,4 @@ mountpoints:
     url: https://asisa-poc.vercel.app/pokemon/
     type: "markup"
   /: https://content.da.live/asisa-softtek/asisa-poc/main/
+# Force refresh: 2026-03-12-01
