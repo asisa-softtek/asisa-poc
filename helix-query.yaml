@@ -1,6 +1,4 @@
 version: 1
-
-indices:
+sitemaps:
   pokemon:
-    include:
-      - /pokemon/**
+    source: https://asisa-poc.vercel.app/pokemon/sitemap.xml
