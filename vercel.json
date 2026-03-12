@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/pokemon/:name.html",
+      "source": "/pokemon/:name",
       "destination": "/api/pokemon?name=:name"
     }
   ]
