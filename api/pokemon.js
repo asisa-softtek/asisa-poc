@@ -69,8 +69,10 @@ export default async function handler(req, res) {
     html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
 
     // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
+    // Añadimos un comentario de debug para verificar en el view-source de AEM
+    const debugComment = `<!-- BYOM Debug: Template=${TEMPLATE_URL} | Status=${html.length > 100 ? 'Loaded' : 'Fallback'} -->`;
     res.setHeader('Content-Type', 'text/html');
-    return res.status(200).send(html);
+    return res.status(200).send(html + debugComment);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
