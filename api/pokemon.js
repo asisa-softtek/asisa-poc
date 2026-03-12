@@ -79,10 +79,27 @@ export default async function handler(req, res) {
       cleanHtml = divMatch[1].trim();
     }
 
-    // 4. Entregar el resultado a Adobe (Sin envoltorio extra, Adobe pondrá el suyo)
-    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Template=${html.length > 500 ? 'Loaded' : 'Fallback'} -->`;
+    // 4. Entregar el resultado a Adobe como un documento HTML completo
+    // Adobe Markup transformer a veces requiere una estructura de documento completa para extraer el <main>
+    const finalHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${pokemon.name.toUpperCase()} - Pokedex BYOM</title>
+</head>
+<body>
+    <main>
+        <div>
+            ${cleanHtml}
+        </div>
+    </main>
+</body>
+</html>`;
+
+    const debugMsg = `BYOM Debug: Time=${new Date().toISOString()} | Size=${finalHtml.length} | Template=${html.length > 500 ? 'Loaded' : 'Fallback'}`;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(cleanHtml + debugComment);
+    res.setHeader('X-BYOM-Debug', debugMsg);
+    res.setHeader('X-Debug-UA', req.headers['user-agent'] || 'none');
+    return res.status(200).send(finalHtml);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
