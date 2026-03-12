@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{name}} - Pokedex BYOM</title>
+    <meta property="og:title" content="{{name}} - Pokedex BYOM">
+    <meta name="description" content="Información de {{name}}">
+  </head>
+  <body>
+    <header></header>
+    <main>
+      <div>
+        <div class="hero">
+          <div>
+            <div>
+              <picture>
+                <img loading="eager" alt="Imagen de {{name}}" src="{{image}}">
+              </picture>
+              <h1 id="{{name_id}}">{{name}}</h1>
+              <p><strong>Nº de Pokedex:</strong> #{{id}}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="cards">
+          <div>
+            <div>
+              <h2 id="stats">Estadísticas Base</h2>
+              <ul>
+                {{stats}}
+              </ul>
+            </div>
+            <div>
+              <h2 id="tipos">Tipos</h2>
+              <ul>
+                {{types}}
+              </ul>
+              <p><strong>Peso:</strong> {{weight}} kg</p>
+              <p><strong>Altura:</strong> {{height}} m</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque de ejemplo para el autor: banner informativo -->
+        <div class="columns">
+          <div>
+            <div>
+              <p>Nota: Este contenido es generado dinámicamente usando la PokeAPI y una plantilla gestionada por autores en AEM.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+  </body>
+</html>
