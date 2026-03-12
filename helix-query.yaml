@@ -1,0 +1,6 @@
+version: 1
+
+indices:
+  pokemon:
+    include:
+      - /pokemon/**
