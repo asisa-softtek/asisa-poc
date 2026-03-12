@@ -3,4 +3,4 @@ mountpoints:
     url: "https://asisa-poc.vercel.app/pokemon/"
     type: "markup"
     suffix: ".html"
-  /: "https://content.da.live/asisa-softtek/asisa-poc/main/"
+  /: "https://main--asisa-poc--asisa-softtek.aem.live/"
