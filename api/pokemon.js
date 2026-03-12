@@ -23,7 +23,6 @@ export default async function handler(req, res) {
     const pokemon = await pokeResponse.json();
 
     // 2. Obtener la plantilla desde AEM (Gestionada por autores)
-    // Usamos el dominio .aem.live para asegurar que traemos la versión publicada.
     const TEMPLATE_URL = 'https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html';
     let html;
     
@@ -32,14 +31,12 @@ export default async function handler(req, res) {
       if (templateResponse.ok) {
         html = await templateResponse.text();
       } else {
-        console.warn('Plantilla remota no encontrada, usando local fallback');
-        const templatePath = path.join(process.cwd(), 'pokemon-template.html');
-        html = fs.readFileSync(templatePath, 'utf8');
+        console.warn(`Plantilla remota no encontrada (${templateResponse.status}), usando base fallback`);
+        html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><div class="stats">{{stats}}</div></div>';
       }
     } catch (e) {
       console.error('Error cargando plantilla remota:', e);
-      const templatePath = path.join(process.cwd(), 'pokemon-template.html');
-      html = fs.readFileSync(templatePath, 'utf8');
+      html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><div class="stats">{{stats}}</div></div>';
     }
 
     // 3. Inyectar datos en la plantilla (Placeholders)
