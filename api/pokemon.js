@@ -68,12 +68,25 @@ export default async function handler(req, res) {
     // Fix específico por si el autor dejó src="about:error" en la imagen
     html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
 
-    // 4. Entregar el resultado a Adobe
+    // 4. Entregar el resultado a Adobe como un documento HTML completo
+    const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${pokemon.name.toUpperCase()} - Pokedex</title>
+    <meta name="description" content="Información de ${pokemon.name.toUpperCase()}">
+</head>
+<body>
+    <main>
+        ${html}
+    </main>
+</body>
+</html>`;
+
     res.setHeader('Content-Type', 'text/html');
-    return res.status(200).send(html);
+    return res.status(200).send(fullHtml);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
-    return res.status(500).send('Error interno del servidor BYOM');
+    return res.status(500).send(`Error interno: ${error.message}`);
   }
 }
