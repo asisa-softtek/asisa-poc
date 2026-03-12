@@ -66,17 +66,23 @@ export default async function handler(req, res) {
     });
 
     // Fix específico por si el autor dejó src="about:error" en la imagen
-    html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
+    html = html.replace(/src="about:error"/g, `src="${replacements['{{image}}']}"`);
 
-    // Envoltura estándar de AEM
-    const finalHtml = `<div class="section">
-      ${html}
-    </div>`;
+    // Limpiar el HTML: Adobe Markup transformer a veces se confunde con divs anidados vacíos
+    // Quitamos los comentarios y los saltos de línea extra para que sea más legible para el parser de Adobe
+    let cleanHtml = html.replace(/<!--[\s\S]*?-->/g, '').trim();
+    
+    // Si el HTML empieza con un div contenedor (común en plantillas .plain.html), intentamos sacar solo lo de dentro
+    // para evitar doble anidación de secciones.
+    const divMatch = cleanHtml.match(/^<div>([\s\S]*)<\/div>$/);
+    if (divMatch) {
+      cleanHtml = divMatch[1].trim();
+    }
 
-    // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
-    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Size=${finalHtml.length} | Template=${html.length > 500 ? 'Loaded' : 'Fallback'} -->`;
+    // 4. Entregar el resultado a Adobe (Sin envoltorio extra, Adobe pondrá el suyo)
+    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Template=${html.length > 500 ? 'Loaded' : 'Fallback'} -->`;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(finalHtml + debugComment);
+    return res.status(200).send(cleanHtml + debugComment);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
