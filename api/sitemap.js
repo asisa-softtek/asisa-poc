@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${pokemons.map(name => `
   <url>
-    <loc>https://main--asisa-poc--asisa-softtek.aem.live/pokemon/${name}.html</loc>
+    <loc>https://main--asisa-poc--asisa-softtek.aem.live/pokemon/${name}</loc>
   </url>`).join('')}
 </urlset>`;
 
