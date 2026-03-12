@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   let { name } = req.query;
   const pokemonName = name ? name.toLowerCase().replace(/\.html$/, '') : '';
@@ -19,16 +22,9 @@ export default async function handler(req, res) {
 
     const pokemon = await pokeResponse.json();
 
-    // 2. Leer la plantilla maestra desde AEM (asisa-poc)
-    // Usamos el .plain.html para obtener solo el contenido limpio
-    const templateURL = 'https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html';
-    const templateResponse = await fetch(templateURL);
-    
-    if (!templateResponse.ok) {
-      throw new Error(`Error al cargar la plantilla desde ${templateURL}`);
-    }
-    
-    let html = await templateResponse.text();
+    // 2. Leer la plantilla maestra desde el sistema de archivos local
+    const templatePath = path.join(process.cwd(), 'pokemon-template.html');
+    let html = fs.readFileSync(templatePath, 'utf8');
 
     // 3. Inyectar datos en la plantilla (Placeholders)
     const statsHtml = pokemon.stats
