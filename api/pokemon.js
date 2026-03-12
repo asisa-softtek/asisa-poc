@@ -22,9 +22,25 @@ export default async function handler(req, res) {
 
     const pokemon = await pokeResponse.json();
 
-    // 2. Leer la plantilla maestra desde el sistema de archivos local
-    const templatePath = path.join(process.cwd(), 'pokemon-template.html');
-    let html = fs.readFileSync(templatePath, 'utf8');
+    // 2. Obtener la plantilla desde AEM (Gestionada por autores)
+    // Usamos el dominio .aem.live para asegurar que traemos la versión publicada.
+    const TEMPLATE_URL = 'https://main--asisa-poc--asisa-softtek.aem.live/templates/pokemon.plain.html';
+    let html;
+    
+    try {
+      const templateResponse = await fetch(TEMPLATE_URL);
+      if (templateResponse.ok) {
+        html = await templateResponse.text();
+      } else {
+        console.warn('Plantilla remota no encontrada, usando local fallback');
+        const templatePath = path.join(process.cwd(), 'pokemon-template.html');
+        html = fs.readFileSync(templatePath, 'utf8');
+      }
+    } catch (e) {
+      console.error('Error cargando plantilla remota:', e);
+      const templatePath = path.join(process.cwd(), 'pokemon-template.html');
+      html = fs.readFileSync(templatePath, 'utf8');
+    }
 
     // 3. Inyectar datos en la plantilla (Placeholders)
     const statsHtml = pokemon.stats
