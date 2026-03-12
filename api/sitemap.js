@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   // En una implementación real, podrías hacer fetch a PokeAPI para obtener todos los nombres
   // Por ahora, usaremos una lista de los más populares para validar el sitemap.
   const pokemons = [
-    'pikachu', 'charizard', 'mewtwo', 'bulbasaur', 'squirtle', 'eevee', 'lucario', 'gengar'
+    'pikachu', 'charizard', 'charmander', 'mewtwo', 'bulbasaur', 'squirtle', 'eevee', 'lucario', 'gengar', 'snorlax', 'dragonite'
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
