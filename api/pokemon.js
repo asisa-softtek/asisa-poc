@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       html = html.split(key).join(replacements[key]);
     });
 
-    // 4. Entregar el resultado a Adobe
+    // 4. Entregar el resultado a Adobe (Vercel Oficial)
     res.setHeader('Content-Type', 'text/html');
     return res.status(200).send(html);
 
