@@ -23,7 +23,8 @@ export default async function handler(req, res) {
     const pokemon = await pokeResponse.json();
 
     // 2. Obtener la plantilla desde AEM (Gestionada por autores)
-    const TEMPLATE_URL = 'https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html';
+    // Añadimos un query param aleatorio para evitar caché agresiva de la plantilla durante pruebas
+    const TEMPLATE_URL = `https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html?cb=${Date.now()}`;
     let html;
     
     try {
@@ -32,11 +33,11 @@ export default async function handler(req, res) {
         html = await templateResponse.text();
       } else {
         console.warn(`Plantilla remota no encontrada (${templateResponse.status}), usando base fallback`);
-        html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><div class="stats">{{stats}}</div></div>';
+        html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
       }
     } catch (e) {
       console.error('Error cargando plantilla remota:', e);
-      html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><div class="stats">{{stats}}</div></div>';
+      html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
     }
 
     // 3. Inyectar datos en la plantilla (Placeholders)
@@ -63,6 +64,9 @@ export default async function handler(req, res) {
     Object.keys(replacements).forEach(key => {
       html = html.split(key).join(replacements[key]);
     });
+
+    // Fix específico por si el autor dejó src="about:error" en la imagen
+    html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
 
     // 4. Entregar el resultado a Adobe
     res.setHeader('Content-Type', 'text/html');
