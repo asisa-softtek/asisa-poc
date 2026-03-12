@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
-  let { name } = req.query;
-  const pokemonName = name ? name.toLowerCase().replace(/\.html$/, '') : '';
+  const { name } = req.query;
+  const pokemonName = name ? name.toLowerCase() : '';
 
   if (!pokemonName) {
     return res.status(400).send('Pokemon name is required');
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     const pokemon = await pokeResponse.json();
 
-    // 2. Leer la plantilla maestra desde AEM (da.live)
+    // 2. Leer la plantilla maestra desde AEM (asisa-poc)
     // Usamos el .plain.html para obtener solo el contenido limpio
     const templateURL = 'https://main--asisa-poc--asisa-softtek.aem.live/pokemon-template.plain.html';
     const templateResponse = await fetch(templateURL);
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       html = html.split(key).join(replacements[key]);
     });
 
-    // 4. Entregar el resultado a Adobe (Vercel Oficial)
+    // 4. Entregar el resultado a Adobe
     res.setHeader('Content-Type', 'text/html');
     return res.status(200).send(html);
 
