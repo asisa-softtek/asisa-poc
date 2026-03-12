@@ -8,7 +8,6 @@ function closeOnEscape(e) {
   if (e.code === 'Escape') {
     const nav = document.getElementById('nav');
     const navSections = nav.querySelector('.nav-sections');
-    if (!navSections) return;
     const navSectionExpanded = navSections.querySelector('[aria-expanded="true"]');
     if (navSectionExpanded && isDesktop.matches) {
       // eslint-disable-next-line no-use-before-define
@@ -18,22 +17,6 @@ function closeOnEscape(e) {
       // eslint-disable-next-line no-use-before-define
       toggleMenu(nav, navSections);
       nav.querySelector('button').focus();
-    }
-  }
-}
-
-function closeOnFocusLost(e) {
-  const nav = e.currentTarget;
-  if (!nav.contains(e.relatedTarget)) {
-    const navSections = nav.querySelector('.nav-sections');
-    if (!navSections) return;
-    const navSectionExpanded = navSections.querySelector('[aria-expanded="true"]');
-    if (navSectionExpanded && isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleAllNavSections(navSections, false);
-    } else if (!isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleMenu(nav, navSections, false);
     }
   }
 }
@@ -59,7 +42,6 @@ function focusNavSection() {
  * @param {Boolean} expanded Whether the element should be expanded or collapsed
  */
 function toggleAllNavSections(sections, expanded = false) {
-  if (!sections) return;
   sections.querySelectorAll('.nav-sections .default-content-wrapper > ul > li').forEach((section) => {
     section.setAttribute('aria-expanded', expanded);
   });
@@ -79,47 +61,42 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
   toggleAllNavSections(navSections, expanded || isDesktop.matches ? 'false' : 'true');
   button.setAttribute('aria-label', expanded ? 'Open navigation' : 'Close navigation');
   // enable nav dropdown keyboard accessibility
-  if (navSections) {
-    const navDrops = navSections.querySelectorAll('.nav-drop');
-    if (isDesktop.matches) {
-      navDrops.forEach((drop) => {
-        if (!drop.hasAttribute('tabindex')) {
-          drop.setAttribute('tabindex', 0);
-          drop.addEventListener('focus', focusNavSection);
-        }
-      });
-    } else {
-      navDrops.forEach((drop) => {
-        drop.removeAttribute('tabindex');
-        drop.removeEventListener('focus', focusNavSection);
-      });
-    }
+  const navDrops = navSections.querySelectorAll('.nav-drop');
+  if (isDesktop.matches) {
+    navDrops.forEach((drop) => {
+      if (!drop.hasAttribute('tabindex')) {
+        drop.setAttribute('role', 'button');
+        drop.setAttribute('tabindex', 0);
+        drop.addEventListener('focus', focusNavSection);
+      }
+    });
+  } else {
+    navDrops.forEach((drop) => {
+      drop.removeAttribute('role');
+      drop.removeAttribute('tabindex');
+      drop.removeEventListener('focus', focusNavSection);
+    });
   }
-
   // enable menu collapse on escape keypress
   if (!expanded || isDesktop.matches) {
     // collapse menu on escape press
     window.addEventListener('keydown', closeOnEscape);
-    // collapse menu on focus lost
-    nav.addEventListener('focusout', closeOnFocusLost);
   } else {
     window.removeEventListener('keydown', closeOnEscape);
-    nav.removeEventListener('focusout', closeOnFocusLost);
   }
 }
 
 /**
- * loads and decorates the header, mainly the nav
+ * decorates the header, mainly the nav
  * @param {Element} block The header block element
  */
 export default async function decorate(block) {
   // load nav as fragment
   const navMeta = getMetadata('nav');
-  const navPath = navMeta ? new URL(navMeta, window.location).pathname : '/nav';
+  const navPath = navMeta ? new URL(navMeta).pathname : '/nav';
   const fragment = await loadFragment(navPath);
 
   // decorate nav DOM
-  block.textContent = '';
   const nav = document.createElement('nav');
   nav.id = 'nav';
   while (fragment.firstElementChild) nav.append(fragment.firstElementChild);

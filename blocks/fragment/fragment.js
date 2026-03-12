@@ -4,13 +4,12 @@
  * https://www.aem.live/developer/block-collection/fragment
  */
 
-// eslint-disable-next-line import/no-cycle
 import {
   decorateMain,
 } from '../../scripts/scripts.js';
 
 import {
-  loadSections,
+  loadBlocks,
 } from '../../scripts/aem.js';
 
 /**
@@ -19,7 +18,7 @@ import {
  * @returns {HTMLElement} The root element of the fragment
  */
 export async function loadFragment(path) {
-  if (path && path.startsWith('/') && !path.startsWith('//')) {
+  if (path && path.startsWith('/')) {
     const resp = await fetch(`${path}.plain.html`);
     if (resp.ok) {
       const main = document.createElement('main');
@@ -35,7 +34,7 @@ export async function loadFragment(path) {
       resetAttributeBase('source', 'srcset');
 
       decorateMain(main);
-      await loadSections(main);
+      await loadBlocks(main);
       return main;
     }
   }
@@ -46,5 +45,11 @@ export default async function decorate(block) {
   const link = block.querySelector('a');
   const path = link ? link.getAttribute('href') : block.textContent.trim();
   const fragment = await loadFragment(path);
-  if (fragment) block.replaceChildren(...fragment.childNodes);
+  if (fragment) {
+    const fragmentSection = fragment.querySelector(':scope .section');
+    if (fragmentSection) {
+      block.closest('.section').classList.add(...fragmentSection.classList);
+      block.closest('.fragment').replaceWith(...fragment.childNodes);
+    }
+  }
 }
