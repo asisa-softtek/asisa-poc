@@ -68,22 +68,9 @@ export default async function handler(req, res) {
     // Fix específico por si el autor dejó src="about:error" en la imagen
     html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
 
-    // 4. Entregar el resultado a Adobe como un documento HTML completo
-    const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <title>${pokemon.name.toUpperCase()} - Pokedex</title>
-    <meta name="description" content="Información de ${pokemon.name.toUpperCase()}">
-</head>
-<body>
-    <main>
-        ${html}
-    </main>
-</body>
-</html>`;
-
+    // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
     res.setHeader('Content-Type', 'text/html');
-    return res.status(200).send(fullHtml);
+    return res.status(200).send(html);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
