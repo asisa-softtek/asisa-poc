@@ -3,6 +3,10 @@
     {
       "source": "/pokemon/:name",
       "destination": "/api/pokemon?name=:name"
+    },
+    {
+      "source": "/pokemon/sitemap.xml",
+      "destination": "/api/sitemap"
     }
   ]
 }
