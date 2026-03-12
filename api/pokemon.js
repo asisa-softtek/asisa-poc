@@ -40,20 +40,15 @@ export default async function handler(req, res) {
       html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
     }
 
-    // 3. Inyectar datos en la plantilla (TEST SIMPLE)
-    html = `<div>
+    // 3. Inyectar datos en la plantilla (AEM Section format)
+    html = `<div class="section">
       <h1 id="test-header">${pokemon.name.toUpperCase()}</h1>
       <p>ID: #${pokemon.id}</p>
-      <p>Si ves esto, el pipeline BYOM funciona.</p>
+      <p>Si ves esto, el pipeline BYOM funciona con clase section.</p>
     </div>`;
 
-    // Fix específico por si el autor dejó src="about:error" en la imagen
-    const testImage = pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default;
-    html = html.replace('src="about:error"', `src="${testImage}"`);
-
     // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
-    // Añadimos un comentario de debug para verificar en el view-source de AEM
-    const debugComment = `<!-- BYOM Debug: Template=${TEMPLATE_URL} | Status=${html.length > 100 ? 'Loaded' : 'Fallback'} -->`;
+    const debugComment = `<!-- BYOM Debug: Template=${TEMPLATE_URL} | Time=${new Date().toISOString()} -->`;
     res.setHeader('Content-Type', 'text/html');
     return res.status(200).send(html + debugComment);
 
