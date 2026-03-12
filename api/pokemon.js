@@ -40,16 +40,20 @@ export default async function handler(req, res) {
       html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
     }
 
-    // 3. Inyectar datos en la plantilla (AEM Section format)
-    html = `<div class="section">
-      <h1 id="test-header">${pokemon.name.toUpperCase()}</h1>
+    console.log('User-Agent:', req.headers['user-agent']);
+    
+    // 3. Inyectar datos en la plantilla (Lean Format for Adobe)
+    // Adobe Markup transformer suele extraer el h1 y los párrafos.
+    html = `
+      <h1>${pokemon.name.toUpperCase()}</h1>
       <p>ID: #${pokemon.id}</p>
-      <p>Si ves esto, el pipeline BYOM funciona con clase section.</p>
-    </div>`;
+      <p>Status: Template ${html.length > 100 ? 'Loaded' : 'Fallback'}</p>
+      <p>Si ves esto, el pipeline BYOM funciona.</p>
+    `;
 
     // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
-    const debugComment = `<!-- BYOM Debug: Template=${TEMPLATE_URL} | Time=${new Date().toISOString()} -->`;
-    res.setHeader('Content-Type', 'text/html');
+    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Size=${html.length} -->`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.status(200).send(html + debugComment);
 
   } catch (error) {
