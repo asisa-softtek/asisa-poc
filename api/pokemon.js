@@ -40,21 +40,43 @@ export default async function handler(req, res) {
       html = '<div><h1>{{name}}</h1><p>ID: #{{id}}</p><img src="{{image}}"><div class="stats"><ul>{{stats}}</ul></div></div>';
     }
 
-    console.log('User-Agent:', req.headers['user-agent']);
+    // 3. Inyectar datos en la plantilla (Placeholders)
+    const statsHtml = pokemon.stats
+      .map(s => `<li><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</li>`)
+      .join('');
     
-    // 3. Inyectar datos en la plantilla (Lean Format for Adobe)
-    // Adobe Markup transformer suele extraer el h1 y los párrafos.
-    html = `
-      <h1>${pokemon.name.toUpperCase()}</h1>
-      <p>ID: #${pokemon.id}</p>
-      <p>Status: Template ${html.length > 100 ? 'Loaded' : 'Fallback'}</p>
-      <p>Si ves esto, el pipeline BYOM funciona.</p>
-    `;
+    const typesHtml = pokemon.types
+      .map(t => `<li>${t.type.name.toUpperCase()}</li>`)
+      .join('');
+
+    const replacements = {
+      '{{name}}': pokemon.name.toUpperCase(),
+      '{{name_id}}': pokemon.name.toLowerCase(),
+      '{{image}}': pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default,
+      '{{id}}': pokemon.id,
+      '{{stats}}': statsHtml,
+      '{{types}}': typesHtml,
+      '{{weight}}': pokemon.weight / 10,
+      '{{height}}': pokemon.height / 10
+    };
+
+    // Aplicar reemplazos
+    Object.keys(replacements).forEach(key => {
+      html = html.split(key).join(replacements[key]);
+    });
+
+    // Fix específico por si el autor dejó src="about:error" en la imagen
+    html = html.replace('src="about:error"', `src="${replacements['{{image}}']}"`);
+
+    // Envoltura estándar de AEM
+    const finalHtml = `<div class="section">
+      ${html}
+    </div>`;
 
     // 4. Entregar el resultado a Adobe (Fragmento para modo markup)
-    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Size=${html.length} -->`;
+    const debugComment = `<!-- BYOM Debug: Time=${new Date().toISOString()} | Size=${finalHtml.length} | Template=${html.length > 500 ? 'Loaded' : 'Fallback'} -->`;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(html + debugComment);
+    return res.status(200).send(finalHtml + debugComment);
 
   } catch (error) {
     console.error('Error en BYOM Function:', error);
