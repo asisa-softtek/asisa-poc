@@ -6,7 +6,7 @@
     },
     {
       "source": "/pokemon/:name",
-      "destination": "/api/pokemon?name=:name"
+      "destination": "/pokemon.html"
     }
   ]
 }
