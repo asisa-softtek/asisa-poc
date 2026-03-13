@@ -39,6 +39,7 @@ export default async function handler(req, res) {
       '{{id}}': pokemon.id,
       '{{image}}': pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default,
       '{{stats}}': pokemon.stats.map(s => `<li>${s.stat.name.toUpperCase()}: ${s.base_stat}</li>`).join(''),
+      '{{types}}': pokemon.types.map(t => `<li>${t.type.name.toUpperCase()}</li>`).join(''),
       '{{height}}': pokemon.height,
       '{{weight}}': pokemon.weight
     };
