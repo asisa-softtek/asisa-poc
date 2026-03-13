@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const { secret } = req.query;
+  const { secret, limit = 50, offset = 0 } = req.query;
 
   // Una capa simple de seguridad
   const SYNC_SECRET = process.env.SYNC_SECRET;
@@ -9,7 +9,6 @@ export default async function handler(req, res) {
 
   const ADMIN_TOKEN = process.env.HLX_ADMIN_API_TOKEN;
   if (!ADMIN_TOKEN) {
-    // Note: If you just added this to Vercel, you need to redeploy the project for it to take effect.
     return res.status(500).json({ error: 'HLX_ADMIN_API_TOKEN not configured' });
   }
 
@@ -23,40 +22,48 @@ export default async function handler(req, res) {
     if (!sitemapResp.ok) throw new Error(`Error al leer sitemap: ${sitemapResp.status}`);
     const xml = await sitemapResp.text();
 
-    // 2. Extraer URLs (usamos regex para evitar dependencias de parsing pesadas en Vercel)
+    // 2. Extraer URLs (usamos regex)
     const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
-    
-    // Filtramos solo las de pokemon
     const pokemonUrls = urls.filter(u => u.includes('/pokemon/'));
 
-    console.log(`Iniciando sincronización de ${pokemonUrls.length} URLs...`);
+    // 3. Aplicar paginación (INDISPENSABLE PARA EVITAR EL TIMEOUT DE VERCEL)
+    const start = parseInt(offset);
+    const end = start + parseInt(limit);
+    const batchToProcess = pokemonUrls.slice(start, end);
+
+    if (batchToProcess.length === 0) {
+      return res.status(200).json({ 
+        message: "No hay más URLs para procesar en este rango", 
+        total: pokemonUrls.length,
+        offset: start
+      });
+    }
+
+    console.log(`Sincronizando lote: ${start} a ${end} de ${pokemonUrls.length} URLs...`);
 
     const results = [];
+    const CONCURRENCY = 5; 
     
-    // 3. Procesamiento en paralelo controlado
-    // NOTA: Con 10.000 URLs, es muy probable que excedas el timeout de Vercel (10s en Free, 60-300s en Pro).
-    // Recomendamos llamar a este endpoint por lotes si el servidor corta la conexión.
-    const CONCURRENCY = 8;
-    for (let i = 0; i < pokemonUrls.length; i += CONCURRENCY) {
-      const batch = pokemonUrls.slice(i, i + CONCURRENCY);
+    for (let i = 0; i < batchToProcess.length; i += CONCURRENCY) {
+      const subBatch = batchToProcess.slice(i, i + CONCURRENCY);
       
-      await Promise.all(batch.map(async (url) => {
+      await Promise.all(subBatch.map(async (url) => {
         try {
           const path = new URL(url).pathname;
           
-          // Notificamos Preview
-          const previewResp = await fetch(`https://admin.hlx.page/preview/${OWNER}/${REPO}/${BRANCH}${path}`, {
+          // Preview
+          await fetch(`https://admin.hlx.page/preview/${OWNER}/${REPO}/${BRANCH}${path}`, {
             method: 'POST',
             headers: { 'x-auth-token': ADMIN_TOKEN }
           });
 
-          // Notificamos Live
-          const liveResp = await fetch(`https://admin.hlx.page/live/${OWNER}/${REPO}/${BRANCH}${path}`, {
+          // Live
+          await fetch(`https://admin.hlx.page/live/${OWNER}/${REPO}/${BRANCH}${path}`, {
             method: 'POST',
             headers: { 'x-auth-token': ADMIN_TOKEN }
           });
 
-          results.push({ path, preview: previewResp.status, live: liveResp.status });
+          results.push({ path, status: 'synced' });
         } catch (e) {
           results.push({ url, error: e.message });
         }
@@ -65,9 +72,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       total: pokemonUrls.length,
-      processed: results.length,
-      message: "Proceso de sincronización completado (sujeto a límites de ejecución de Vercel)",
-      summary: results.slice(0, 50) // Solo devolvemos los primeros 50 para no inflar la respuesta
+      processedInThisBatch: results.length,
+      currentOffset: start,
+      nextOffset: end < pokemonUrls.length ? end : null,
+      message: "Lote completado con éxito. Por favor, usa el 'nextOffset' para continuar.",
+      results: results
     });
 
   } catch (error) {
