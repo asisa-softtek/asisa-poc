@@ -1,4 +1,5 @@
 mountpoints:
   /:
-    url: https://asisa-poc.vercel.app
+    url: https://asisa-poc.vercel.app/
     type: "markup"
+    suffix: ".html"
