@@ -20,10 +20,12 @@ export default async function handler(req, res) {
     const { path: specificPath } = req.query;
     let urlsToProcess = [];
     let totalUrls = 0;
+    let nextOffset = null;
 
     if (specificPath) {
       // Caso 1: Sincronizar solo una ruta específica
-      urlsToProcess = [specificPath.startsWith('/') ? specificPath : `/${specificPath}`];
+      const cleanPath = specificPath.startsWith('/') ? specificPath : `/${specificPath}`;
+      urlsToProcess = [cleanPath];
       totalUrls = 1;
     } else {
       // Caso 2: Sincronizar desde el sitemap (comportamiento por defecto)
@@ -38,6 +40,7 @@ export default async function handler(req, res) {
       const start = parseInt(offset);
       const end = start + parseInt(limit);
       urlsToProcess = pokemonUrls.slice(start, end).map(url => new URL(url).pathname);
+      nextOffset = end < pokemonUrls.length ? end : null;
     }
 
     if (urlsToProcess.length === 0) {
@@ -52,13 +55,11 @@ export default async function handler(req, res) {
     const results = [];
     const CONCURRENCY = 5; 
     
-    for (let i = 0; i < batchToProcess.length; i += CONCURRENCY) {
-      const subBatch = batchToProcess.slice(i, i + CONCURRENCY);
+    for (let i = 0; i < urlsToProcess.length; i += CONCURRENCY) {
+      const subBatch = urlsToProcess.slice(i, i + CONCURRENCY);
       
-      await Promise.all(subBatch.map(async (url) => {
+      await Promise.all(subBatch.map(async (path) => {
         try {
-          const path = new URL(url).pathname;
-          
           // Preview
           await fetch(`https://admin.hlx.page/preview/${OWNER}/${REPO}/${BRANCH}${path}`, {
             method: 'POST',
@@ -73,17 +74,16 @@ export default async function handler(req, res) {
 
           results.push({ path, status: 'synced' });
         } catch (e) {
-          results.push({ url, error: e.message });
+          results.push({ path, error: e.message });
         }
       }));
     }
 
     return res.status(200).json({
-      total: pokemonUrls.length,
+      total: totalUrls,
       processedInThisBatch: results.length,
-      currentOffset: start,
-      nextOffset: end < pokemonUrls.length ? end : null,
-      message: "Lote completado con éxito. Por favor, usa el 'nextOffset' para continuar.",
+      nextOffset: nextOffset,
+      message: specificPath ? `Sincronización de ${specificPath} completada.` : "Lote completado con éxito.",
       results: results
     });
 
