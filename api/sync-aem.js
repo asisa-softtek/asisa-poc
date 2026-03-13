@@ -17,29 +17,37 @@ export default async function handler(req, res) {
   const BRANCH = "main";
 
   try {
-    // 1. Leer el sitemap generado dinámicamente
-    const sitemapResp = await fetch(`https://asisa-poc.vercel.app/sitemap.xml`);
-    if (!sitemapResp.ok) throw new Error(`Error al leer sitemap: ${sitemapResp.status}`);
-    const xml = await sitemapResp.text();
+    const { path: specificPath } = req.query;
+    let urlsToProcess = [];
+    let totalUrls = 0;
 
-    // 2. Extraer URLs (usamos regex)
-    const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
-    const pokemonUrls = urls.filter(u => u.includes('/pokemon/'));
+    if (specificPath) {
+      // Caso 1: Sincronizar solo una ruta específica
+      urlsToProcess = [specificPath.startsWith('/') ? specificPath : `/${specificPath}`];
+      totalUrls = 1;
+    } else {
+      // Caso 2: Sincronizar desde el sitemap (comportamiento por defecto)
+      const sitemapResp = await fetch(`https://asisa-poc.vercel.app/sitemap.xml`);
+      if (!sitemapResp.ok) throw new Error(`Error al leer sitemap: ${sitemapResp.status}`);
+      const xml = await sitemapResp.text();
 
-    // 3. Aplicar paginación (INDISPENSABLE PARA EVITAR EL TIMEOUT DE VERCEL)
-    const start = parseInt(offset);
-    const end = start + parseInt(limit);
-    const batchToProcess = pokemonUrls.slice(start, end);
+      const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
+      const pokemonUrls = urls.filter(u => u.includes('/pokemon/'));
+      totalUrls = pokemonUrls.length;
 
-    if (batchToProcess.length === 0) {
+      const start = parseInt(offset);
+      const end = start + parseInt(limit);
+      urlsToProcess = pokemonUrls.slice(start, end).map(url => new URL(url).pathname);
+    }
+
+    if (urlsToProcess.length === 0) {
       return res.status(200).json({ 
-        message: "No hay más URLs para procesar en este rango", 
-        total: pokemonUrls.length,
-        offset: start
+        message: "No hay URLs para procesar", 
+        total: totalUrls
       });
     }
 
-    console.log(`Sincronizando lote: ${start} a ${end} de ${pokemonUrls.length} URLs...`);
+    console.log(`Sincronizando ${urlsToProcess.length} URLs...`);
 
     const results = [];
     const CONCURRENCY = 5; 
