@@ -9,6 +9,7 @@ export default async function handler(req, res) {
 
   const ADMIN_TOKEN = process.env.HLX_ADMIN_API_TOKEN;
   if (!ADMIN_TOKEN) {
+    // Note: If you just added this to Vercel, you need to redeploy the project for it to take effect.
     return res.status(500).json({ error: 'HLX_ADMIN_API_TOKEN not configured' });
   }
 
