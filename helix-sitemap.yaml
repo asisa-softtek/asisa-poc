@@ -3,5 +3,7 @@ version: 1
 sitemaps:
   sitemap:
     source: https://asisa-poc.vercel.app/pokemon/sitemap.xml
+    destination: /sitemap.xml
   pokemon:
     source: https://asisa-poc.vercel.app/pokemon/sitemap.xml
+    destination: /pokemon/sitemap.xml
