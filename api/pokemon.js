@@ -1,3 +1,23 @@
+async function getMDWInfo() {
+  const url = 'https://ursaepru.asisa.es/ASISA/middlewasisa/public/v1/api/searchPortal/network';
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'Ocp-Apim-Subscription-Key': 'ce863b4c72024e2da8414bbf34501ffa'
+      }
+    });
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error(`HTTP ${resp.status} for ${url} :: ${txt}`);
+    }
+    return await resp.json();
+  } catch (error) {
+    console.error('MDW Info Error:', error);
+    return { error: error.message };
+  }
+}
+
 export default async function handler(req, res) {
   let { name } = req.query;
   const pokemonName = name ? name.toLowerCase().split('.').shift() : '';
@@ -7,7 +27,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pokeResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+    // Lanzamos ambas peticiones en paralelo
+    const [pokeResponse, mdwInfo] = await Promise.all([
+      fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`),
+      getMDWInfo()
+    ]);
+
     if (!pokeResponse.ok) {
       // En modo 'markup', Adobe espera HTML. No podemos mandar un 301 real desde aquí.
       // Mandamos un 200 con meta refresh y noindex para que Adobe lo procese y de-indexe.
@@ -52,6 +77,10 @@ export default async function handler(req, res) {
             <h3>Stats</h3>
             <ul>{{stats}}</ul>
           </div>
+          <div class="mdw">
+            <h3>Middleware Network Info</h3>
+            <pre>{{mdw}}</pre>
+          </div>
         </div>
       `;
     }
@@ -63,7 +92,8 @@ export default async function handler(req, res) {
       '{{stats}}': pokemon.stats.map(s => `<li><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</li>`).join(''),
       '{{types}}': pokemon.types.map(t => `<li>${t.type.name.toUpperCase()}</li>`).join(''),
       '{{height}}': pokemon.height,
-      '{{weight}}': pokemon.weight
+      '{{weight}}': pokemon.weight,
+      '{{mdw}}': JSON.stringify(mdwInfo, null, 2)
     };
 
     Object.keys(replacements).forEach(key => {
