@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
       "source": "/pokemon/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/pokemon/sitemap",
       "destination": "/api/sitemap"
     },
     {
