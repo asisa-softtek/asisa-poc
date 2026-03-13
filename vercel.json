@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/pokemon/sitemap.xml(.html)?",
+      "source": "/pokemon/sitemap.xml",
       "destination": "/api/sitemap"
     },
     {
