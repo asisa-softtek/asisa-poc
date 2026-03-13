@@ -8,7 +8,11 @@ export default async function handler(req, res) {
 
   try {
     const pokeResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-    if (!pokeResponse.ok) return res.status(404).send('Pokémon no encontrado');
+    if (!pokeResponse.ok) {
+      // Si el pokemon no existe o ha sido dado de baja, redirigimos con un 301
+      res.setHeader('Location', '/pokemon');
+      return res.status(301).send('Pokémon no encontrado, redirigiendo...');
+    }
     const pokemon = await pokeResponse.json();
 
     // Intentamos cargar la plantilla desde AEM para que los autores puedan editarla
