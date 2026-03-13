@@ -1,6 +1,6 @@
 version: 1
 
 indices:
-  pokemon:
+  query-index:
     include:
       - /pokemon/**
