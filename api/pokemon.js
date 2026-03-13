@@ -9,9 +9,27 @@ export default async function handler(req, res) {
   try {
     const pokeResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
     if (!pokeResponse.ok) {
-      // Si el pokemon no existe o ha sido dado de baja, redirigimos con un 301
-      res.setHeader('Location', '/pokemon');
-      return res.status(301).send('Pokémon no encontrado, redirigiendo...');
+      // En modo 'markup', Adobe espera HTML. No podemos mandar un 301 real desde aquí.
+      // Mandamos un 200 con meta refresh y noindex para que Adobe lo procese y de-indexe.
+      const redirectHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="robots" content="noindex, nofollow">
+            <meta http-equiv="refresh" content="0; url=/pokemon">
+            <title>Redirigiendo...</title>
+          </head>
+          <body>
+            <main>
+              <div>
+                <p>Pokémon no encontrado. Redirigiendo al <a href="/pokemon">listado completo</a>...</p>
+              </div>
+            </main>
+          </body>
+        </html>
+      `;
+      res.setHeader('Content-Type', 'text/html');
+      return res.status(200).send(redirectHtml);
     }
     const pokemon = await pokeResponse.json();
 
