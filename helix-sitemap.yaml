@@ -2,5 +2,5 @@ version: 1
 
 sitemaps:
   pokemon:
-    source: /query-index.json
+    source: https://asisa-poc.vercel.app/sitemap-index.json
     destination: /sitemap-pokemon.xml
