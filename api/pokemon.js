@@ -100,6 +100,16 @@ export default async function handler(req, res) {
       html = html.split(key).join(replacements[key]);
     });
 
+    // Si la plantilla de AEM no tenía el placeholder {{mdw}}, lo añadimos al final por seguridad
+    if (!html.includes(JSON.stringify(mdwInfo, null, 2))) {
+      html += `
+        <div class="mdw" style="margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem;">
+          <h3>Asisa Middleware Info (Debug)</h3>
+          <pre style="background: #f4f4f4; padding: 1rem; overflow: auto;">${JSON.stringify(mdwInfo, null, 2)}</pre>
+        </div>
+      `;
+    }
+
     // Envolvemos en un main para que Adobe lo procese bien
     const finalHtml = `<!DOCTYPE html><html><head><title>${pokemon.name}</title></head><body><main><div>${html}</div></main></body></html>`;
 
